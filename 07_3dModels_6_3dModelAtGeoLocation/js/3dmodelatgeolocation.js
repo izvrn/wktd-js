@@ -49,9 +49,50 @@ var World = {
         World.showUserInstructions("Ready 6.");
     },
 
+    locationChanged: function locationChangedFn(lat, lon, alt, acc) {
+
+        World.showUserInstructions("lat: " + lat + " lon: " + lon + " alt: " + alt);
+//        if (!World.initiallyLoadedData) {
+//
+//            var indicatorImage = new AR.ImageResource("assets/indi.png");
+//            World.indicatorDrawable = new AR.ImageDrawable(indicatorImage, 0.1, {
+//                                                               verticalAnchor: AR.CONST.VERTICAL_ANCHOR.TOP
+//                                                           });
+//
+//            World.targetLocation = new AR.GeoLocation(59.000573, 30.334724, AR.CONST.UNKNOWN_ALTITUDE);
+//
+//            World.loadPoisFromJsonData();
+//            World.createModelAtLocation();
+//            World.initiallyLoadedData = true;
+//        }
+//
+//        // store user's current location in World.userLocation, so you always know where user is
+//        World.userLocation = {
+//            'latitude': lat,
+//            'longitude': lon,
+//            'altitude': alt,
+//            'accuracy': acc
+//        };
+//
+//        if (World.targetLocation)
+//        {
+//            World.stateOnDistance();
+//
+//            var latDirection = World.targetLocation.latitude - World.userLocation.latitude;
+//            var lonDirection = World.targetLocation.longitude - World.userLocation.longitude;
+//        }
+    },
+
     showUserInstructions: function showUserInstructionsFn(message) {
         document.getElementById('loadingMessage').innerHTML = message;
+    },
+
+    formatNum: function formatNumFn(num, decimals) {
+        var sign = num >= 0 ? 1 : -1;
+        return (Math.round((num*Math.pow(10,decimals)) + (sign*0.001)) / Math.pow(10,decimals)).toFixed(decimals);
     }
 };
 
 World.init();
+
+AR.context.onLocationChanged = World.locationChanged;
