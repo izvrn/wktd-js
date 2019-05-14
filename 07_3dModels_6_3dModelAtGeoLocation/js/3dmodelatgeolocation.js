@@ -45,7 +45,12 @@ var World = {
     },
 
     worldLoaded: function worldLoadedFn() {
-        document.getElementById("loadingMessage").style.display = "none";
+//        document.getElementById("loadingMessage").style.display = "none";
+        World.showUserInstructions("Ready 6.");
+    },
+
+    showUserInstructions: function showUserInstructionsFn(message) {
+        document.getElementById('loadingMessage').innerHTML = message;
     }
 };
 
