@@ -135,7 +135,12 @@ Marker.prototype.getOnClickTrigger = function(marker) {
         if (!Marker.prototype.isAnyAnimationRunning(marker)) {
             if (marker.isSelected) {
 
-                Marker.prototype.setDeselected(marker);
+//                Marker.prototype.setDeselected(marker);
+                try {
+                    World.onMarkerSelected(marker);
+                } catch (err) {
+                    alert(err);
+                }
 
             } else {
                 Marker.prototype.setSelected(marker);
@@ -144,7 +149,6 @@ Marker.prototype.getOnClickTrigger = function(marker) {
                 } catch (err) {
                     alert(err);
                 }
-
             }
         } else {
             AR.logger.debug('a animation is already running');

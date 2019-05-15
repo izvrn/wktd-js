@@ -19,8 +19,11 @@ var World = {
     /* List of AR.GeoObjects that are currently shown in the scene / World. */
     markerList: [],
 
-//    /* the last selected marker. */
-//    currentMarker: null,
+    /* the last selected marker. */
+    currentMarker: null,
+
+    // selected to navigate marker
+    selectedMarker: null,
 
     locationUpdateCounter: 0,
     updatePlacemarkDistancesEveryXLocationUpdates: 10,
@@ -112,12 +115,14 @@ var World = {
             "description": "Nearby POI"
         };
         World.markerList.push(new Marker(singlePoi));
+        currentPlaceNr = currentPlaceNr + 1;
 
 
         /* Updates distance information of all placemarks. */
         World.updateDistanceToUserValues();
 
-        World.showUserMessage((currentPlaceNr + 1) + ' places loaded');
+//        World.showUserMessage("cullingDistance=" + AR.context.scene.cullingDistance);
+        World.showUserMessage(currentPlaceNr + ' places loaded');
     },
 
     /* Request POI data. */
@@ -208,6 +213,84 @@ var World = {
     /* Helper to sort places by distance, descending. */
     sortByDistanceSortingDescending: function sortByDistanceSortingDescendingFn(a, b) {
         return b.distanceToUser - a.distanceToUser;
+    },
+
+    /* Fired when user pressed maker in cam. */
+    onMarkerSelected: function onMarkerSelectedFn(marker) {
+        World.currentMarker = marker;
+
+        /*
+            In this sample a POI detail panel appears when pressing a cam-marker (the blue box with title &
+            description), compare index.html in the sample's directory.
+        */
+        /* Update panel values. */
+        $("#poi-detail-title").html(marker.poiData.title);
+        $("#poi-detail-description").html(marker.poiData.description);
+
+
+        /*
+            It's ok for AR.Location subclass objects to return a distance of `undefined`. In case such a distance
+            was calculated when all distances were queried in `updateDistanceToUserValues`, we recalculate this
+            specific distance before we update the UI.
+         */
+        if (undefined === marker.distanceToUser) {
+            marker.distanceToUser = marker.markerObject.locations[0].distanceToUser();
+        }
+
+        /*
+            Distance and altitude are measured in meters by the SDK. You may convert them to miles / feet if
+            required.
+        */
+        var distanceToUserValue = (marker.distanceToUser > 999) ?
+            ((marker.distanceToUser / 1000).toFixed(2) + " km") :
+            (Math.round(marker.distanceToUser) + " m");
+
+        $("#poi-detail-distance").html(distanceToUserValue);
+
+        /* Show panel. */
+        $("#panel-poidetail").panel("open", 123);
+
+        $(".ui-panel-dismiss").unbind("mousedown");
+
+//        /* Deselect AR-marker when user exits detail screen div. */
+//        $("#panel-poidetail").on("panelbeforeclose", function(event, ui) {
+//            if((World.selectedMarker == null) || (World.currentMarker.poiData.id !== World.selectedMarker.poiData.id))
+//                World.currentMarker.setDeselected(World.currentMarker);
+//        });
+    },
+
+    /* User clicked "Navigate" button in POI-detail panel -> fire event to open native screen. */
+    onCloseButtonClicked: function onCloseButtonClickedFn() {
+        if((World.selectedMarker == null) || (World.currentMarker.poiData.id !== World.selectedMarker.poiData.id))
+            World.currentMarker.setDeselected(World.currentMarker);
+
+        $("#panel-poidetail").panel("close");
+    },
+
+    /* User clicked "Navigate" button in POI-detail panel -> fire event to open native screen. */
+    onPoiNavigateButtonClicked: function onPoiNavigateButtonClickedFn() {
+        if (World.selectedMarker) {
+            World.selectedMarker.setDeselected(World.selectedMarker);
+        }
+
+        if (World.currentMarker) {
+            World.selectedMarker = World.currentMarker;
+        }
+
+        $("#panel-poidetail").panel("close");
+    },
+
+
+    /* Screen was clicked but no geo-object was hit. */
+    onScreenClick: function onScreenClickFn() {
+        if (World.currentMarker) {
+            World.currentMarker.setDeselected(World.currentMarker);
+        }
+
+        if (World.selectedMarker) {
+            World.selectedMarker.setDeselected(World.selectedMarker);
+            World.selectedMarker = null;
+        }
     },
 
     showUserMessage: function showUserMessageFn(message) {

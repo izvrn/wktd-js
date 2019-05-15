@@ -59,7 +59,8 @@
             <!-- header with "close" button -->
             <div data-role="header" data-theme="c">
                 <h1>Details</h1>
-                <a href="#header" data-rel="close">Close</a>
+                <!--<a href="#header" data-rel="close">Close</a>-->
+                <a href="javascript: World.onCloseButtonClicked();" data-role="button" data-inline="true">Close</a>
             </div>
 
             <!-- content of POI detail page, you may also add thumbnails etc. here if you like -->
@@ -75,8 +76,10 @@
                 <h4>Distance: <a id="poi-detail-distance"></a></h4>
 
                 <!-- more button-->
-                <a href="javascript: World.onPoiDetailMoreButtonClicked();" data-role="button" data-icon="arrow-r"
+                <a href="javascript: World.onPoiNavigateButtonClicked();" data-role="button" data-icon="check"
                    data-iconpos="right" data-inline="true">Navigate</a>
+
+                <img src="assets/images/hut.jpg" alt="hut">
             </div>
         </div>
     </div>
