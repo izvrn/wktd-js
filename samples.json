@@ -1,5 +1,21 @@
 [
     {
+        "category_name": "IZ",
+        "samples": [
+            {
+                "name": "Tower At Geo Location",
+                "path": "21_Demo_1_Tower/index.html",
+                "requiredFeatures": [
+                    "geo"
+                ],
+                "startupConfiguration": {
+                    "camera_position": "back",
+                    "camera_resolution": "auto"
+                }
+            }
+        ]
+    },
+    {
         "category_name": "Image Tracking",
         "samples": [
             {
