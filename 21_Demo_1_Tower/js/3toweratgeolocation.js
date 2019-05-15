@@ -28,31 +28,36 @@ var World = {
     locationUpdateCounter: 0,
     updatePlacemarkDistancesEveryXLocationUpdates: 10,
 
+    // модель
+    targetGeoObject: null,
+
 //    init: function initFn() {
 //        this.createModelAtLocation();
 //    },
 //
-//    createModelAtLocation: function createModelAtLocationFn() {
-//
-//        /*
-//            First a location where the model should be displayed will be defined. This location will be relativ to
-//            the user.
-//        */
-////        var location = new AR.RelativeLocation(null, 50, -50, 0);
-////        var location = new AR.GeoLocation(51.689153, 39.261848, 118);
+    createModelAtLocation: function createModelAtLocationFn(marker) {
+
+        /*
+            First a location where the model should be displayed will be defined. This location will be relativ to
+            the user.
+        */
+//        var location = new AR.RelativeLocation(null, 50, -50, 0);
+//        var location = new AR.GeoLocation(51.689153, 39.261848, 118);
 //        var location = new AR.GeoLocation(51.689153, 39.261848, 0);
-//
-//        /* Next the model object is loaded. */
-//        var modelEarth = new AR.Model("assets/House.wt3", {
+
+        var modelLocation = new AR.GeoLocation(marker.poiData.latitude, marker.poiData.longitude, AR.CONST.UNKNOWN_ALTITUDE);
+
+        /* Next the model object is loaded. */
+        var model = new AR.Model("assets/House.wt3", {
 //            onLoaded: this.worldLoaded,
-//            onError: World.onError,
-//            scale: {
-//                x: 1,
-//                y: 1,
-//                z: 1
-//            }
-//        });
-//
+            onError: World.onError,
+            scale: {
+                x: 1,
+                y: 1,
+                z: 1
+            }
+        });
+
 //        var indicatorImage = new AR.ImageResource("assets/indi.png", {
 //            onError: World.onError
 //        });
@@ -60,15 +65,15 @@ var World = {
 //        var indicatorDrawable = new AR.ImageDrawable(indicatorImage, 0.1, {
 //            verticalAnchor: AR.CONST.VERTICAL_ANCHOR.TOP
 //        });
-//
-//        /* Putting it all together the location and 3D model is added to an AR.GeoObject. */
-//        this.geoObject = new AR.GeoObject(location, {
-//            drawables: {
-//                cam: [modelEarth],
-//                indicator: [indicatorDrawable]
-//            }
-//        });
-//    },
+
+        /* Putting it all together the location and 3D model is added to an AR.GeoObject. */
+        this.targetGeoObject = new AR.GeoObject(modelLocation, {
+            drawables: {
+                cam: [model],
+            },
+            enabled: false
+        });
+    },
 //
 //    worldLoaded: function worldLoadedFn() {
 //        World.showUserMessage("Ready 6.");
@@ -184,9 +189,47 @@ var World = {
             World.updateDistanceToUserValues();
         }
 
+        World.stateOnDistance();
+
         /* Helper used to update placemark information every now and then (e.g. every 10 location upadtes fired). */
         World.locationUpdateCounter =
             (++World.locationUpdateCounter % World.updatePlacemarkDistancesEveryXLocationUpdates);
+    },
+
+    // отслеживаем гео пользователя, если близко то показываем модель, если далеко, то показываем poi
+    stateOnDistance: function stateOnDistanceFn() {
+
+        if(World.selectedMarker){
+            var distance = World.selectedMarker.distanceToUser;
+
+    //        var e = document.getElementById('loadingMessage');
+            if (distance < 20)
+            {
+                if (World.targetGeoObject.enabled != true)
+                {
+                    World.targetGeoObject.enabled = true;
+                    World.selectedMarker.markerObject.enabled = false;
+
+//                    for (var i = 0; i < World.markerList.length; i++) {
+//                        if(World.selectedMarker.poiData.id === World.markerList[i]..poiData.id)
+//                    }
+
+//                    e.innerHTML = "Мы рядом с целью! Нажмите на неё!";
+                }
+            }
+            else
+            {
+                if (World.selectedMarker.markerObject.enabled != true)
+                {
+                    World.targetGeoObject.enabled = false;
+                    World.selectedMarker.markerObject.enabled = true;
+                }
+    //
+    //            e.innerHTML = distance + " метров";
+            }
+
+            World.showUserMessage(distance + ' m to POI, lat=' + World.userLocation.latitude + ' lon=' + World.userLocation.longitude);
+        }
     },
 
     /* Returns distance in meters of placemark with maxdistance * 1.1. */
@@ -275,6 +318,8 @@ var World = {
 
         if (World.currentMarker) {
             World.selectedMarker = World.currentMarker;
+
+            World.createModelAtLocation(World.selectedMarker);
         }
 
         $("#panel-poidetail").panel("close");
@@ -290,7 +335,12 @@ var World = {
         if (World.selectedMarker) {
             World.selectedMarker.setDeselected(World.selectedMarker);
             World.selectedMarker = null;
+
+            //delete World.targetGeoObject;
+            World.targetGeoObject = null;
         }
+
+        World.showUserMessage('Select POI to navigate');
     },
 
     showUserMessage: function showUserMessageFn(message) {
