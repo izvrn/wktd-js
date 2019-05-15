@@ -22,6 +22,9 @@ var World = {
 //    /* the last selected marker. */
 //    currentMarker: null,
 
+    locationUpdateCounter: 0,
+    updatePlacemarkDistancesEveryXLocationUpdates: 10,
+
 //    init: function initFn() {
 //        this.createModelAtLocation();
 //    },
@@ -69,7 +72,7 @@ var World = {
 //    },
 
     /* Called to inject new POI data. */
-    loadPoisFromJsonData: function loadPoisFromJsonDataFn(poiData) {
+    loadPoisFromJsonData: function loadPoisFromJsonDataFn(poiData, latitude, longitude) {
 
         /* Empty list of visible markers. */
         World.markerList = [];
@@ -99,7 +102,22 @@ var World = {
             World.markerList.push(new Marker(singlePoi));
         }
 
-        World.showUserMessage(currentPlaceNr + ' places loaded');
+        // добавить близкую точку
+        var singlePoi = {
+            "id": 3,
+            "latitude": latitude + (Math.random() / 5 - 0.1),
+            "longitude": longitude + (Math.random() / 5 - 0.1),
+            "altitude": AR.CONST.UNKNOWN_ALTITUDE,
+            "title": "POI#N",
+            "description": "Nearby POI"
+        };
+        World.markerList.push(new Marker(singlePoi));
+
+
+        /* Updates distance information of all placemarks. */
+        World.updateDistanceToUserValues();
+
+        World.showUserMessage((currentPlaceNr + 1) + ' places loaded');
     },
 
     /* Request POI data. */
@@ -108,7 +126,33 @@ var World = {
 //        var poisNearby = Helper.bringPlacesToUser(myJsonData, lat, lon);
 //        World.loadPoisFromJsonData(poisNearby);
 
-        World.loadPoisFromJsonData(myJsonData);
+        World.loadPoisFromJsonData(myJsonData, lat, lon);
+    },
+
+    /*
+        Sets/updates distances of all makers so they are available way faster than calling (time-consuming)
+        distanceToUser() method all the time.
+     */
+    updateDistanceToUserValues: function updateDistanceToUserValuesFn() {
+        var minDistance = 10000000;
+        var maxDistance = 0;
+        var minDistanceName = "POI";
+        var maxDistanceName = "POI";
+
+        for (var i = 0; i < World.markerList.length; i++) {
+            World.markerList[i].distanceToUser = World.markerList[i].markerObject.locations[0].distanceToUser();
+
+            if(World.markerList[i].distanceToUser < minDistance){
+                minDistance = World.markerList[i].distanceToUser;
+                minDistanceName = World.markerList[i].poiData.title;
+            }
+            if(World.markerList[i].distanceToUser > maxDistance){
+                maxDistance = World.markerList[i].distanceToUser;
+                maxDistanceName = World.markerList[i].poiData.title;
+            }
+        }
+
+        World.updateStatusMessage('min=' + minDistance + ' (' + minDistanceName + ') max=' + maxDistance + ' (' + maxDistanceName + ')');
     },
 
     locationChanged: function locationChangedFn(lat, lon, alt, acc) {
@@ -127,22 +171,60 @@ var World = {
         if (!World.initiallyLoadedData) {
             World.requestDataFromLocal(lat, lon);
             World.initiallyLoadedData = true;
-         }
-//        } else if (World.locationUpdateCounter === 0) {
-//            /*
-//                Update placemark distance information frequently, you max also update distances only every 10m with
-//                some more effort.
-//             */
-//            World.updateDistanceToUserValues();
-//        }
-//
-//        /* Helper used to update placemark information every now and then (e.g. every 10 location upadtes fired). */
-//        World.locationUpdateCounter =
-//            (++World.locationUpdateCounter % World.updatePlacemarkDistancesEveryXLocationUpdates);
+        } else if (World.locationUpdateCounter === 0) {
+            /*
+                Update placemark distance information frequently, you max also update distances only every 10m with
+                some more effort.
+             */
+            World.updateDistanceToUserValues();
+        }
+
+        /* Helper used to update placemark information every now and then (e.g. every 10 location upadtes fired). */
+        World.locationUpdateCounter =
+            (++World.locationUpdateCounter % World.updatePlacemarkDistancesEveryXLocationUpdates);
+    },
+
+    /* Returns distance in meters of placemark with maxdistance * 1.1. */
+    getMaxDistance: function getMaxDistanceFn() {
+
+        /* Sort places by distance so the first entry is the one with the maximum distance. */
+        World.markerList.sort(World.sortByDistanceSortingDescending);
+
+        /* Use distanceToUser to get max-distance. */
+        var maxDistanceMeters = World.markerList[0].distanceToUser;
+
+        /*
+            Return maximum distance times some factor >1.0 so ther is some room left and small movements of user
+            don't cause places far away to disappear.
+         */
+        return maxDistanceMeters * 1.1;
+    },
+
+    /* Helper to sort places by distance. */
+    sortByDistanceSorting: function sortByDistanceSortingFn(a, b) {
+        return a.distanceToUser - b.distanceToUser;
+    },
+
+    /* Helper to sort places by distance, descending. */
+    sortByDistanceSortingDescending: function sortByDistanceSortingDescendingFn(a, b) {
+        return b.distanceToUser - a.distanceToUser;
     },
 
     showUserMessage: function showUserMessageFn(message) {
         document.getElementById('loadingMessage').innerHTML = message;
+    },
+
+    /* Updates status message shown in small "i"-button aligned bottom center. */
+    updateStatusMessage: function updateStatusMessageFn(message, isWarning) {
+
+        var themeToUse = isWarning ? "e" : "c";
+        var iconToUse = isWarning ? "alert" : "info";
+
+        $("#status-message").html(message);
+        $("#popupInfoButton").buttonMarkup({
+            theme: themeToUse,
+            icon: iconToUse
+        });
     },
 
     onError: function onErrorFn(error) {
