@@ -1,100 +1,185 @@
 var World = {
+    /*
+        User's latest known location, accessible via userLocation.latitude, userLocation.longitude,
+         userLocation.altitude.
+     */
+    userLocation: null,
 
-    init: function initFn() {
-        this.createModelAtLocation();
-    },
+//    /* You may request new data from server periodically, however: in this sample data is only requested once. */
+//    isRequestingData: false,
 
-    createModelAtLocation: function createModelAtLocationFn() {
+    /* True once data was fetched. */
+    initiallyLoadedData: false,
 
-        /*
-            First a location where the model should be displayed will be defined. This location will be relativ to
-            the user.
-        */
-//        var location = new AR.RelativeLocation(null, 50, -50, 0);
-//        var location = new AR.GeoLocation(51.689153, 39.261848, 118);
-        var location = new AR.GeoLocation(51.689153, 39.261848, 0);
+    /* Different POI-Marker assets. */
+    markerDrawableIdle: null,
+    markerDrawableSelected: null,
+    markerDrawableDirectionIndicator: null,
 
-        /* Next the model object is loaded. */
-        var modelEarth = new AR.Model("assets/House.wt3", {
-            onLoaded: this.worldLoaded,
-            onError: World.onError,
-            scale: {
-                x: 1,
-                y: 1,
-                z: 1
-            }
+    /* List of AR.GeoObjects that are currently shown in the scene / World. */
+    markerList: [],
+
+//    /* the last selected marker. */
+//    currentMarker: null,
+
+//    init: function initFn() {
+//        this.createModelAtLocation();
+//    },
+//
+//    createModelAtLocation: function createModelAtLocationFn() {
+//
+//        /*
+//            First a location where the model should be displayed will be defined. This location will be relativ to
+//            the user.
+//        */
+////        var location = new AR.RelativeLocation(null, 50, -50, 0);
+////        var location = new AR.GeoLocation(51.689153, 39.261848, 118);
+//        var location = new AR.GeoLocation(51.689153, 39.261848, 0);
+//
+//        /* Next the model object is loaded. */
+//        var modelEarth = new AR.Model("assets/House.wt3", {
+//            onLoaded: this.worldLoaded,
+//            onError: World.onError,
+//            scale: {
+//                x: 1,
+//                y: 1,
+//                z: 1
+//            }
+//        });
+//
+//        var indicatorImage = new AR.ImageResource("assets/indi.png", {
+//            onError: World.onError
+//        });
+//
+//        var indicatorDrawable = new AR.ImageDrawable(indicatorImage, 0.1, {
+//            verticalAnchor: AR.CONST.VERTICAL_ANCHOR.TOP
+//        });
+//
+//        /* Putting it all together the location and 3D model is added to an AR.GeoObject. */
+//        this.geoObject = new AR.GeoObject(location, {
+//            drawables: {
+//                cam: [modelEarth],
+//                indicator: [indicatorDrawable]
+//            }
+//        });
+//    },
+//
+//    worldLoaded: function worldLoadedFn() {
+//        World.showUserMessage("Ready 6.");
+//    },
+
+    /* Called to inject new POI data. */
+    loadPoisFromJsonData: function loadPoisFromJsonDataFn(poiData) {
+
+        /* Empty list of visible markers. */
+        World.markerList = [];
+
+        /* Start loading marker assets. */
+        World.markerDrawableIdle = new AR.ImageResource("assets/marker_idle.png", {
+            onError: World.onError
         });
-
-        var indicatorImage = new AR.ImageResource("assets/indi.png", {
+        World.markerDrawableSelected = new AR.ImageResource("assets/marker_selected.png", {
+            onError: World.onError
+        });
+        World.markerDrawableDirectionIndicator = new AR.ImageResource("assets/indi.png", {
             onError: World.onError
         });
 
-        var indicatorDrawable = new AR.ImageDrawable(indicatorImage, 0.1, {
-            verticalAnchor: AR.CONST.VERTICAL_ANCHOR.TOP
-        });
+        /* Loop through POI-information and create an AR.GeoObject (=Marker) per POI. */
+        for (var currentPlaceNr = 0; currentPlaceNr < poiData.length; currentPlaceNr++) {
+            var singlePoi = {
+                "id": poiData[currentPlaceNr].id,
+                "latitude": parseFloat(poiData[currentPlaceNr].latitude),
+                "longitude": parseFloat(poiData[currentPlaceNr].longitude),
+                "altitude": parseFloat(poiData[currentPlaceNr].altitude),
+                "title": poiData[currentPlaceNr].name,
+                "description": poiData[currentPlaceNr].description
+            };
 
-        /* Putting it all together the location and 3D model is added to an AR.GeoObject. */
-        this.geoObject = new AR.GeoObject(location, {
-            drawables: {
-                cam: [modelEarth],
-                indicator: [indicatorDrawable]
-            }
-        });
+            World.markerList.push(new Marker(singlePoi));
+        }
+
+        World.showUserMessage(currentPlaceNr + ' places loaded');
+    },
+
+    /* Request POI data. */
+    requestDataFromLocal: function requestDataFromLocalFn(lat, lon) {
+
+//        var poisNearby = Helper.bringPlacesToUser(myJsonData, lat, lon);
+//        World.loadPoisFromJsonData(poisNearby);
+
+        World.loadPoisFromJsonData(myJsonData);
+    },
+
+    locationChanged: function locationChangedFn(lat, lon, alt, acc) {
+//        World.showUserMessage("lat: " + lat + " lon: " + lon + " alt: " + alt + " acc: " + acc);
+
+        /* Store user's current location in World.userLocation, so you always know where user is. */
+        World.userLocation = {
+            'latitude': lat,
+            'longitude': lon,
+            'altitude': alt,
+            'accuracy': acc
+        };
+
+
+        /* Request data if not already present. */
+        if (!World.initiallyLoadedData) {
+            World.requestDataFromLocal(lat, lon);
+            World.initiallyLoadedData = true;
+         }
+//        } else if (World.locationUpdateCounter === 0) {
+//            /*
+//                Update placemark distance information frequently, you max also update distances only every 10m with
+//                some more effort.
+//             */
+//            World.updateDistanceToUserValues();
+//        }
+//
+//        /* Helper used to update placemark information every now and then (e.g. every 10 location upadtes fired). */
+//        World.locationUpdateCounter =
+//            (++World.locationUpdateCounter % World.updatePlacemarkDistancesEveryXLocationUpdates);
+    },
+
+    showUserMessage: function showUserMessageFn(message) {
+        document.getElementById('loadingMessage').innerHTML = message;
     },
 
     onError: function onErrorFn(error) {
         alert(error);
-    },
-
-    worldLoaded: function worldLoadedFn() {
-//        document.getElementById("loadingMessage").style.display = "none";
-        World.showUserInstructions("Ready 6.");
-    },
-
-    locationChanged: function locationChangedFn(lat, lon, alt, acc) {
-
-        World.showUserInstructions("lat: " + lat + " lon: " + lon + " alt: " + alt);
-//        if (!World.initiallyLoadedData) {
-//
-//            var indicatorImage = new AR.ImageResource("assets/indi.png");
-//            World.indicatorDrawable = new AR.ImageDrawable(indicatorImage, 0.1, {
-//                                                               verticalAnchor: AR.CONST.VERTICAL_ANCHOR.TOP
-//                                                           });
-//
-//            World.targetLocation = new AR.GeoLocation(59.000573, 30.334724, AR.CONST.UNKNOWN_ALTITUDE);
-//
-//            World.loadPoisFromJsonData();
-//            World.createModelAtLocation();
-//            World.initiallyLoadedData = true;
-//        }
-//
-//        // store user's current location in World.userLocation, so you always know where user is
-//        World.userLocation = {
-//            'latitude': lat,
-//            'longitude': lon,
-//            'altitude': alt,
-//            'accuracy': acc
-//        };
-//
-//        if (World.targetLocation)
-//        {
-//            World.stateOnDistance();
-//
-//            var latDirection = World.targetLocation.latitude - World.userLocation.latitude;
-//            var lonDirection = World.targetLocation.longitude - World.userLocation.longitude;
-//        }
-    },
-
-    showUserInstructions: function showUserInstructionsFn(message) {
-        document.getElementById('loadingMessage').innerHTML = message;
-    },
-
-    formatNum: function formatNumFn(num, decimals) {
-        var sign = num >= 0 ? 1 : -1;
-        return (Math.round((num*Math.pow(10,decimals)) + (sign*0.001)) / Math.pow(10,decimals)).toFixed(decimals);
     }
 };
 
-World.init();
+//var Helper = {
+//
+//    /*
+//        For demo purpose only, this method takes poi data and a center point (latitude, longitude) to relocate the
+//        given places randomly around the user
+//    */
+//    bringPlacesToUser: function bringPlacesToUserFn(poiData, latitude, longitude) {
+//        for (var i = 0; i < poiData.length; i++) {
+//            poiData[i].latitude = latitude;
+//            poiData[i].longitude = longitude;
+//            poiData[i].altitude = 0;
+//
+////            poiData[i].latitude = latitude + (Math.random() / 5 - 0.1);
+////            poiData[i].longitude = longitude + (Math.random() / 5 - 0.1);
+////            /*
+////                Note: setting altitude to '0' will cause places being shown below / above user, depending on the
+////                user 's GPS signal altitude. Using this contant will ignore any altitude information and always
+////                show the places on user-level altitude.
+////            */
+////            poiData[i].altitude = AR.CONST.UNKNOWN_ALTITUDE;
+//        }
+//        return poiData;
+//    }
+//};
 
+
+//World.init();
+
+/* Forward locationChanges to custom function. */
 AR.context.onLocationChanged = World.locationChanged;
+
+/* Forward clicks in empty area to World. */
+AR.context.onScreenClick = World.onScreenClick;
