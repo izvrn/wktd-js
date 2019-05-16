@@ -1,4 +1,8 @@
 var World = {
+
+    // Расстояние переключения с метки на модель (м)
+    nearDistance: 100,
+
     /*
         User's latest known location, accessible via userLocation.latitude, userLocation.longitude,
          userLocation.altitude.
@@ -203,7 +207,7 @@ var World = {
             var distance = World.selectedMarker.distanceToUser;
 
     //        var e = document.getElementById('loadingMessage');
-            if (distance < 20)
+            if (distance < World.nearDistance)
             {
                 if (World.targetGeoObject.enabled != true)
                 {
@@ -228,7 +232,8 @@ var World = {
     //            e.innerHTML = distance + " метров";
             }
 
-            World.showUserMessage(distance + ' m to POI, lat=' + World.userLocation.latitude + ' lon=' + World.userLocation.longitude);
+//            World.showUserMessage(distance + ' m to POI, lat=' + World.userLocation.latitude + ' lon=' + World.userLocation.longitude);
+            World.showUserMessage(World.formatNum(distance, 0) + ' m to POI (lat=' + World.formatNum(World.userLocation.latitude, 4) + ' lon=' + World.formatNum(World.userLocation.longitude, 4) + ')');
         }
     },
 
@@ -326,7 +331,8 @@ var World = {
     },
 
 
-    /* Screen was clicked but no geo-object was hit. */
+    // Screen was clicked but no geo-object was hit.
+    // Убрать выделенные метки, скрыть модель
     onScreenClick: function onScreenClickFn() {
         if (World.currentMarker) {
             World.currentMarker.setDeselected(World.currentMarker);
@@ -341,6 +347,11 @@ var World = {
         }
 
         World.showUserMessage('Select POI to navigate');
+    },
+
+    formatNum: function formatNumFn(num, decimals) {
+        var sign = num >= 0 ? 1 : -1;
+        return (Math.round((num * Math.pow(10, decimals)) + (sign * 0.001)) / Math.pow(10, decimals)).toFixed(decimals);
     },
 
     showUserMessage: function showUserMessageFn(message) {
