@@ -1,7 +1,7 @@
 var World = {
 
     // Расстояние переключения с метки на модель (м)
-    nearDistance: 100,
+    nearDistance: 200,
 
     /*
         User's latest known location, accessible via userLocation.latitude, userLocation.longitude,
@@ -123,6 +123,17 @@ var World = {
             "title": "POI#N",
             "description": "Nearby POI"
         };
+//        var relationLocation = new AR.RelativeLocation(null, 5, 0, 0);
+//        var geoObj = new AR.GeoObject(relationLocation, enabled: false);
+//        var nearLocation = geoObj.locations[0];
+//        var singlePoi = {
+//            "id": 3,
+//            "latitude": nearLocation.,
+//            "longitude": longitude + (Math.random() / 5 - 0.1),
+//            "altitude": AR.CONST.UNKNOWN_ALTITUDE,
+//            "title": "POI#N",
+//            "description": "Nearby POI"
+//        };
         World.markerList.push(new Marker(singlePoi));
         currentPlaceNr = currentPlaceNr + 1;
 
@@ -334,8 +345,18 @@ var World = {
     // Screen was clicked but no geo-object was hit.
     // Убрать выделенные метки, скрыть модель
     onScreenClick: function onScreenClickFn() {
+
         if (World.currentMarker) {
             World.currentMarker.setDeselected(World.currentMarker);
+        }
+
+        if(World.targetGeoObject){
+            World.selectedMarker.markerObject.enabled = true;
+//            World.targetGeoObject.enabled = false;
+
+            World.targetGeoObject.destroy();
+//            delete World.targetGeoObject;
+            World.targetGeoObject = null;
         }
 
         if (World.selectedMarker) {
@@ -343,7 +364,7 @@ var World = {
             World.selectedMarker = null;
 
             //delete World.targetGeoObject;
-            World.targetGeoObject = null;
+            //World.targetGeoObject = null;
         }
 
         World.showUserMessage('Select POI to navigate');
