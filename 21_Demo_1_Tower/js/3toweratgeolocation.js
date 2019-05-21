@@ -1,7 +1,7 @@
 var World = {
 
     // Расстояние переключения с метки на модель (м)
-    nearDistance: 200,
+    nearDistance: 50,
 
     /*
         User's latest known location, accessible via userLocation.latitude, userLocation.longitude,
@@ -35,10 +35,10 @@ var World = {
     // модель
     targetGeoObject: null,
 
-//    init: function initFn() {
-//        this.createModelAtLocation();
-//    },
-//
+    init: function initFn() {
+        AR.logger.activateDebugMode();
+    },
+
     createModelAtLocation: function createModelAtLocationFn(marker) {
 
         /*
@@ -59,8 +59,14 @@ var World = {
                 x: 1,
                 y: 1,
                 z: 1
-            }
+            },
+            //rotatesToCamera: true
         });
+
+        if (model.rotatesToCamera)
+            AR.logger.debug("rotatesToCamera = true");
+        else
+            AR.logger.debug("rotatesToCamera = false");
 
 //        var indicatorImage = new AR.ImageResource("assets/indi.png", {
 //            onError: World.onError
@@ -100,6 +106,7 @@ var World = {
             onError: World.onError
         });
 
+//var currentPlaceNr = 0;
         /* Loop through POI-information and create an AR.GeoObject (=Marker) per POI. */
         for (var currentPlaceNr = 0; currentPlaceNr < poiData.length; currentPlaceNr++) {
             var singlePoi = {
@@ -115,15 +122,30 @@ var World = {
         }
 
         // добавить близкую точку
-        var singlePoi = {
-            "id": 3,
-            "latitude": latitude + (Math.random() / 5 - 0.1),
-            "longitude": longitude + (Math.random() / 5 - 0.1),
-            "altitude": AR.CONST.UNKNOWN_ALTITUDE,
-            "title": "POI#N",
-            "description": "Nearby POI"
-        };
-//        var relationLocation = new AR.RelativeLocation(null, 5, 0, 0);
+//        var singlePoi = {
+//            "id": currentPlaceNr,
+//            "latitude": latitude + (Math.random() / 5 - 0.1),
+//            "longitude": longitude + (Math.random() / 5 - 0.1),
+//            "altitude": AR.CONST.UNKNOWN_ALTITUDE,
+//            "title": "POI#N",
+//            "description": "Nearby POI"
+//        };
+
+//        for (var tt = 1; tt <= 10; tt++) {
+//            var singlePoi = {
+//                "id": 10 + tt,
+//                "latitude": latitude - 0.0000001*(tt*10),
+//                "longitude": longitude,
+////            "longitude": longitude + (Math.random() / 5 - 0.1),
+//                "altitude": AR.CONST.UNKNOWN_ALTITUDE,
+//                "title": "POI#T",
+//                "description": "p" + tt
+//            };
+//
+//            World.markerList.push(new Marker(singlePoi));
+//        }
+
+//        var relationLocation = new AR.RelativeLocation(null, -5, 0, 0);
 //        var geoObj = new AR.GeoObject(relationLocation, enabled: false);
 //        var nearLocation = geoObj.locations[0];
 //        var singlePoi = {
@@ -134,15 +156,19 @@ var World = {
 //            "title": "POI#N",
 //            "description": "Nearby POI"
 //        };
-        World.markerList.push(new Marker(singlePoi));
-        currentPlaceNr = currentPlaceNr + 1;
-
+//        World.markerList.push(new Marker(singlePoi));
+//        currentPlaceNr = currentPlaceNr + tt;
+        World.showUserMessage(currentPlaceNr + ' places loaded');
 
         /* Updates distance information of all placemarks. */
         World.updateDistanceToUserValues();
 
 //        World.showUserMessage("cullingDistance=" + AR.context.scene.cullingDistance);
-        World.showUserMessage(currentPlaceNr + ' places loaded');
+        AR.context.scene.minScalingDistance = 10;
+        AR.context.scene.maxScalingDistance = 200;
+        AR.context.scene.scalingFactor = 0.1;
+
+        World.showUserMessage("minScalingDistance=" + AR.context.scene.minScalingDistance + " maxScalingDistance=" + AR.context.scene.maxScalingDistance + " ScalingFactor=" + AR.context.scene.scalingFactor);
     },
 
     /* Request POI data. */
@@ -225,6 +251,8 @@ var World = {
                     World.targetGeoObject.enabled = true;
                     World.selectedMarker.markerObject.enabled = false;
 
+//                    AR.logger.debug('Мы рядом с целью!');
+
 //                    for (var i = 0; i < World.markerList.length; i++) {
 //                        if(World.selectedMarker.poiData.id === World.markerList[i]..poiData.id)
 //                    }
@@ -238,13 +266,15 @@ var World = {
                 {
                     World.targetGeoObject.enabled = false;
                     World.selectedMarker.markerObject.enabled = true;
+
+//                    AR.logger.debug('Мы не рядом с целью!');
                 }
     //
     //            e.innerHTML = distance + " метров";
             }
 
-//            World.showUserMessage(distance + ' m to POI, lat=' + World.userLocation.latitude + ' lon=' + World.userLocation.longitude);
-            World.showUserMessage(World.formatNum(distance, 0) + ' m to POI (lat=' + World.formatNum(World.userLocation.latitude, 4) + ' lon=' + World.formatNum(World.userLocation.longitude, 4) + ')');
+//          World.showUserMessage(distance + ' m to POI, lat=' + World.userLocation.latitude + ' lon=' + World.userLocation.longitude);
+            World.showUserMessage(World.formatNum(distance, 0) + 'm to ' + World.selectedMarker.poiData.description + ' (lat=' + World.formatNum(World.userLocation.latitude, 4) + ' lon=' + World.formatNum(World.userLocation.longitude, 4) + ')');
         }
     },
 
@@ -423,7 +453,7 @@ var World = {
 //};
 
 
-//World.init();
+World.init();
 
 /* Forward locationChanges to custom function. */
 AR.context.onLocationChanged = World.locationChanged;
