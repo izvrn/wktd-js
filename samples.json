@@ -3,6 +3,9 @@
         "category_name": "IZ",
         "samples": [
             {
+                "required_extensions": [
+                    "geo"
+                ],
                 "name": "Tower At Geo Location",
                 "path": "21_Demo_1_Tower/index.html",
                 "requiredFeatures": [

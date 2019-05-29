@@ -39,15 +39,19 @@
         <!-- transparent footer-->
         <div data-role="footer" class="ui-bar" data-theme="f" data-position="fixed" style="text-align:center;">
 
-            <!-- small status-button -->
+            <!-- small status-button
             <a style="text-align:right;" id="popupInfoButton" href="#popupInfo" data-rel="popup" data-role="button"
                class="ui-icon-alt" data-inline="true" data-transition="pop" data-icon="alert" data-theme="e"
-               data-iconpos="notext">Log</a> </p>
+               data-iconpos="notext">Log</a> </p> -->
 
-            <!-- popup displayed when button clicked -->
+            <!-- popup displayed when button clicked
             <div data-role="popup" id="popupInfo" class="ui-content" data-theme="e" style="max-width:350px;">
                 <p style="text-align:right;" id="status-message">Trying to find out where you are</p>
-            </div>
+            </div> -->
+
+            <a style="text-align:right;" id="popupSettingsButton" href="javascript: World.onSettingsOpenButtonClicked();" data-rel="popup" data-role="button"
+               class="ui-icon-alt" data-inline="true" data-transition="pop" data-icon="gear" data-theme="e"
+               data-iconpos="notext">Settings</a> </p>
 
         </div>
 
@@ -80,6 +84,48 @@
                    data-iconpos="right" data-inline="true">Navigate</a>
 
                 <img src="assets/images/hut.jpg" alt="hut">
+            </div>
+        </div>
+
+            <div data-role="panel" id="panel-settings" data-position="right" data-display="overlay"
+                 style="background-color:#F0F0F0;" data-theme="c">
+
+                <!-- header with "close" button -->
+                <div data-role="header" data-theme="c">
+                    <h1>Settings</h1>
+                </div>
+
+                <!-- content of POI detail page, you may also add thumbnails etc. here if you like -->
+                <div data-role="content">
+                    <p><b>Latitude:</b><br>
+                        <input id="latitude" type="text" style="width: 100px;" >
+                    </p>
+                    <p><b>Longitude:</b><br>
+                        <input id="longitude" type="text" style="width: 100px;" >
+                    </p>
+                    <p><b>Altitude:</b><br>
+                        <input id="altitude" type="text" style="width: 100px;" >
+                    </p>
+                    <p><b>Scale:</b><br>
+                        X: <input id="scaleX" type="text" >
+                        Y: <input id="scaleY" type="text" >
+                        Z: <input id="scaleZ" type="text" >
+                    </p>
+                    <p><b>Rotate:</b><br>
+                        X: <input id="rotateX" type="text" >
+                        Y: <input id="rotateY" type="text" >
+                        Z: <input id="rotateZ" type="text" >
+                    </p>
+                    <p><b>Translate:</b><br>
+                        X: <input id="translateX" type="text" >
+                        Y: <input id="translateY" type="text" >
+                        Z: <input id="translateZ" type="text" >
+                    </p>
+                    <p><a href="javascript: World.onSettingsCancelButtonClicked();" data-role="button" data-icon="delete"
+                          data-iconpos="right" data-inline="true">Cancel</a>
+                        <a href="javascript: World.onSettingsSaveButtonClicked();" data-role="button" data-icon="check"
+                           data-iconpos="right" data-inline="true">Save</a>
+                </div>
             </div>
         </div>
     </div>

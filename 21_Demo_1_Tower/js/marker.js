@@ -40,8 +40,8 @@ function Marker(poiData) {
         onClick: null
     });
 
-    /* Create an AR.Label for the marker's title . */
-    this.titleLabel = new AR.Label(poiData.title.trunc(10), 1, {
+    /* Create an AR.Label for the marker's name . */
+    this.titleLabel = new AR.Label(poiData.name.trunc(10), 1, {
         zOrder: 1,
         translate: {
             y: 0.55

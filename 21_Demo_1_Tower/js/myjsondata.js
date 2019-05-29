@@ -4,26 +4,38 @@ var myJsonData = [{
     "longitude": "39.261848",
     "description": "Fisherman's hut",
     "altitude": "100.0",
-    "name": "POI#1"
+    "name": "POI#1",
+    "scale": "1,1,1",
+    "rotate": "0,0,0",
+    "translate": "0,0,0"
 }, {
     "id": "2",
     "latitude": "51.6910",
     "longitude": "39.2687",
     "description": "Fountain",
     "altitude": "120.0",
-    "name": "POI#2"
+    "name": "POI#2",
+    "scale": "1,1,1",
+    "rotate": "0,0,0",
+    "translate": "0,0,0"
 }, {
     "id": "3",
     "latitude": "51.68988",
     "longitude": "39.264786",
     "description": "Museum",
     "altitude": "0",
-    "name": "POI#3"
+    "name": "POI#3",
+    "scale": "1,1,1",
+    "rotate": "0,0,0",
+    "translate": "0,0,0"
 }, {
     "id": "4",
     "latitude": "51.6676",
     "longitude": "39.1958",
     "description": "Square",
     "altitude": "0",
-    "name": "POI#4"
+    "name": "POI#4",
+    "scale": "1,1,1",
+    "rotate": "0,0,0",
+    "translate": "0,0,0"
 }];
