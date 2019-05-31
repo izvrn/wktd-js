@@ -49,7 +49,7 @@
                 <p style="text-align:right;" id="status-message">Trying to find out where you are</p>
             </div> -->
 
-            <a style="text-align:right;" id="popupSettingsButton" href="javascript: World.onSettingsOpenButtonClicked();" data-rel="popup" data-role="button"
+            <a id="popupSettingsButton" href="javascript: World.onSettingsOpenButtonClicked();" data-rel="popup" data-role="button"
                class="ui-icon-alt" data-inline="true" data-transition="pop" data-icon="gear" data-theme="e"
                data-iconpos="notext">Settings</a> </p>
 
@@ -83,7 +83,7 @@
                 <a href="javascript: World.onPoiNavigateButtonClicked();" data-role="button" data-icon="check"
                    data-iconpos="right" data-inline="true">Navigate</a>
 
-                <img src="assets/images/hut.jpg" alt="hut">
+                <img src="assets/images/Dullenturm.jpg" alt="hut">
             </div>
         </div>
 
@@ -103,28 +103,41 @@
                     <p><b>Longitude:</b><br>
                         <input id="longitude" type="text" style="width: 100px;" >
                     </p>
-                    <p><b>Altitude:</b><br>
-                        <input id="altitude" type="text" style="width: 100px;" >
+                    <!--<p><b>Altitude:</b><br>-->
+                        <!--<input id="altitude" type="text" style="width: 100px;" >-->
+                    <!--</p>-->
+                    <p><b>Move</b><br>
+                        <b  style="font-size:10px;">(Move units ~m. Default = 0)</b><br>
+                        <!--X (+right  -left): <input id="translateX" type="text" >-->
+                        <!--Y (+up -down): <input id="translateY" type="text" >-->
+                        <!--Z (+near -farther): <input id="translateZ" type="text" >-->
+                        X (+East  -West): <input id="translateX" type="text" >
+                        Y (+up -down): <input id="translateY" type="text" >
+                        Z (+South -North): <input id="translateZ" type="text" >
                     </p>
-                    <p><b>Scale:</b><br>
-                        X: <input id="scaleX" type="text" >
-                        Y: <input id="scaleY" type="text" >
-                        Z: <input id="scaleZ" type="text" >
+                    <p><b>Rotate</b><br>
+                        <b style="font-size:10px;">Degrees. Default = 0</b><br>
+                        <!--X: <input id="rotateX" type="text" >-->
+                        <!--Y: <input id="rotateY" type="text" >-->
+                        <!--Z: <input id="rotateZ" type="text" >-->
+                        Y (+clockwise -contra_cws): <input id="rotateY" type="text" >
                     </p>
-                    <p><b>Rotate:</b><br>
-                        X: <input id="rotateX" type="text" >
-                        Y: <input id="rotateY" type="text" >
-                        Z: <input id="rotateZ" type="text" >
+                    <p><b>Scale</b><br>
+                        <b style="font-size:10px;">Scale multiplier. Default = 1</b><br>
+                        <!--X: <input id="scaleX" type="text" >-->
+                        <!--Y: <input id="scaleY" type="text" >-->
+                        <!--Z: <input id="scaleZ" type="text" >-->
+                        M (0.5 to half): <input id="scaleM" type="text" >
                     </p>
-                    <p><b>Translate:</b><br>
-                        X: <input id="translateX" type="text" >
-                        Y: <input id="translateY" type="text" >
-                        Z: <input id="translateZ" type="text" >
-                    </p>
-                    <p><a href="javascript: World.onSettingsCancelButtonClicked();" data-role="button" data-icon="delete"
-                          data-iconpos="right" data-inline="true">Cancel</a>
+                    <p>
                         <a href="javascript: World.onSettingsSaveButtonClicked();" data-role="button" data-icon="check"
                            data-iconpos="right" data-inline="true">Save</a>
+                        <a href="javascript: World.onSettingsCancelButtonClicked();" data-role="button" data-icon="delete"
+                          data-iconpos="right" data-inline="true">Cancel</a>
+                        <br>
+                        <a href="javascript: World.onSettingsDefaultButtonClicked();" data-role="button" data-icon="refresh"
+                           data-iconpos="right" data-inline="true">Default</a>
+                    </p>
                 </div>
             </div>
         </div>

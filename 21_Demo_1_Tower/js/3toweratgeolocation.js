@@ -1,13 +1,14 @@
 var World = {
 
     // Расстояние переключения с метки на модель (м)
-    nearDistance: 50,
+    nearDistance: 30,
 
     /*
         User's latest known location, accessible via userLocation.latitude, userLocation.longitude,
          userLocation.altitude.
      */
     userLocation: null,
+    prevDistance: -1.0,
 
 //    /* You may request new data from server periodically, however: in this sample data is only requested once. */
 //    isRequestingData: false,
@@ -38,7 +39,7 @@ var World = {
     targetGeoObject: null,
 
     init: function initFn() {
-        //AR.logger.activateDebugMode();
+        AR.logger.activateDebugMode();
     },
 
     createModelAtLocation: function createModelAtLocationFn(marker) {
@@ -57,8 +58,17 @@ var World = {
         var rotateXYZ = marker.poiData.rotate.split(',');
         var translateXYZ = marker.poiData.translate.split(',');
 
+        var path = "";
+
+        if (marker.poiData.id == 5)
+            path = "assets/Tower.wt3";
+        else if (marker.poiData.id == 6)
+            path = "assets/TownhallOld.wt3";
+        else
+            path = "assets/House.wt3";
+
         /* Next the model object is loaded. */
-        var model = new AR.Model("assets/Tower.wt3", {
+        var model = new AR.Model(path, {
 //            onLoaded: this.worldLoaded,
             onError: World.onError,
             scale: {
@@ -125,7 +135,6 @@ var World = {
             onError: World.onError
         });
 
-//var currentPlaceNr = 0;
         /* Loop through POI-information and create an AR.GeoObject (=Marker) per POI. */
         for (var currentPlaceNr = 0; currentPlaceNr < poiData.length; currentPlaceNr++) {
             var singlePoi = {
@@ -186,8 +195,7 @@ var World = {
         /* Updates distance information of all placemarks. */
         World.updateDistanceToUserValues();
 
-//        World.showUserMessage("cullingDistance=" + AR.context.scene.cullingDistance);
-        AR.context.scene.minScalingDistance = 10;
+        AR.context.scene.minScalingDistance = 20;
         AR.context.scene.maxScalingDistance = 200;
         AR.context.scene.scalingFactor = 0.2;
 
@@ -200,6 +208,8 @@ var World = {
         AR.platform.sendJSONObject({
             action: "load_poi_list",
         });
+
+        $("#popupSettingsButton").hide();
     },
 
     loadExistingPoiList: function requestDataFromLocalFn(jsonData){
@@ -262,7 +272,6 @@ var World = {
 
         if (World.targetGeoObject != null){
             World.stateOnDistance();
-            AR.logger.debug(World.targetGeoObject.destroyed);
         }
 
         /* Helper used to update placemark information every now and then (e.g. every 10 location upadtes fired). */
@@ -274,30 +283,37 @@ var World = {
     stateOnDistance: function stateOnDistanceFn() {
             var distance = World.selectedMarker.distanceToUser;
 
-            AR.logger.debug(distance);
+            AR.logger.debug("Curr.: " + distance + ", Prev.: " + World.prevDistance);
 
-            if (distance < World.nearDistance)
-            {
-                if (World.targetGeoObject.enabled != true)
+            //if (World.prevDistance == -1.0 || ((Math.abs(World.prevDistance - distance) < 20) && (Math.abs(World.prevDistance - distance) > 1))) {
+                if (distance < World.nearDistance)
                 {
-                    World.targetGeoObject.enabled = true;
-                    World.selectedMarker.markerObject.enabled = false;
+                    if (World.targetGeoObject.enabled != true)
+                    {
+                        World.targetGeoObject.enabled = true;
+                        World.selectedMarker.markerObject.enabled = false;
 
-                    AR.logger.debug('Мы рядом с целью!');
+                        AR.logger.debug('Мы рядом с целью!');
+                    }
                 }
-            }
-            else
-            {
-                if (World.selectedMarker.markerObject.enabled != true)
+                else
                 {
-                    World.targetGeoObject.enabled = false;
-                    World.selectedMarker.markerObject.enabled = true;
+                    if (World.selectedMarker.markerObject.enabled != true)
+                    {
+                        World.targetGeoObject.enabled = false;
+                        World.selectedMarker.markerObject.enabled = true;
 
-                    AR.logger.debug('Мы не рядом с целью!');
+                        AR.logger.debug('Мы не рядом с целью!');
+                    }
                 }
-            }
 
-            World.showUserMessage(World.formatNum(distance, 0) + 'm to ' + World.selectedMarker.poiData.description + ' (lat=' + World.formatNum(World.userLocation.latitude, 4) + ' lon=' + World.formatNum(World.userLocation.longitude, 4) + ')');
+                World.prevDistance = World.selectedMarker.distanceToUser;
+
+                World.showUserMessage(World.formatNum(distance, 0) + 'm to ' + World.selectedMarker.poiData.description + ' (lat=' + World.formatNum(World.userLocation.latitude, 4) + ' lon=' + World.formatNum(World.userLocation.longitude, 4) + ')');
+            //}
+            //else if (Math.abs(World.prevDistance - distance) < 1) {
+            //    World.prevDistance = World.selectedMarker.distanceToUser;
+            //}
     },
 
     /* Returns distance in meters of placemark with maxdistance * 1.1. */
@@ -407,6 +423,8 @@ var World = {
         World.stateOnDistance();
 
         $("#panel-poidetail").panel("close");
+
+        $("#popupSettingsButton").show();
     },
 
      findSelectedMarker: function findSelectedMarkerFn() {
@@ -420,41 +438,71 @@ var World = {
         }
      },
 
-    onSettingsCancelButtonClicked: function onSettingsCancelButtonClickedFn() {
-            $("#panel-settings").panel("close");
-     },
+    onSettingsOpenButtonClicked: function onSettingsOpenButtonClickedFn() {
+         if (World.selectedMarker != null) {
+            $("#panel-settings").panel("open");
+
+//            $("#latitude").val(World.formatNum(World.selectedMarker.poiData.latitude, 4);
+//            $("#longitude").val(World.formatNum(World.selectedMarker.poiData.longitude, 4);
+//            $("#altitude").val(World.selectedMarker.poiData.altitude);
+            $("#latitude").val(World.formatNum(World.selectedMarker.poiData.latitude, 4));
+            $("#longitude").val(World.formatNum(World.selectedMarker.poiData.longitude, 4));
+
+            var scaleXYZ = World.selectedMarker.poiData.scale.split(',');
+            var rotateXYZ = World.selectedMarker.poiData.rotate.split(',');
+            var translateXYZ = World.selectedMarker.poiData.translate.split(',');
+
+            $("#translateX").val(translateXYZ[0]);
+            $("#translateY").val(translateXYZ[1]);
+            $("#translateZ").val(translateXYZ[2]);
+
+//            $("#rotateX").val(rotateXYZ[0]);
+            $("#rotateY").val(rotateXYZ[1]);
+//            $("#rotateZ").val(rotateXYZ[2]);
+
+//            $("#scaleX").val(scaleXYZ[0]);
+//            $("#scaleY").val(scaleXYZ[1]);
+//            $("#scaleZ").val(scaleXYZ[2]);
+            $("#scaleM").val(scaleXYZ[0]);
+         }
+    },
 
     onSettingsSaveButtonClicked: function onSettingsSaveButtonClickedFn() {
         if (World.selectedMarker != null) {
             World.selectedMarker.markerObject.locations[0].latitude = parseFloat($("#latitude").val());
             World.selectedMarker.markerObject.locations[0].longitude = parseFloat($("#longitude").val());
-            World.selectedMarker.markerObject.locations[0].altitude = parseFloat($("#altitude").val());
+//            World.selectedMarker.markerObject.locations[0].altitude = parseFloat($("#altitude").val());
 
             World.selectedMarker.poiData.latitude = parseFloat($("#latitude").val());
             World.selectedMarker.poiData.longitude = parseFloat($("#longitude").val());
-            World.selectedMarker.poiData.altitude = parseFloat($("#altitude").val());
+//            World.selectedMarker.poiData.altitude = parseFloat($("#altitude").val());
 
-            World.selectedMarker.poiData.scale = $("#scaleX").val() + "," + $("#scaleY").val() + "," + $("#scaleZ").val();
-            World.selectedMarker.poiData.rotate = $("#rotateX").val() + "," + $("#rotateY").val() + "," + $("#rotateZ").val();
+
             World.selectedMarker.poiData.translate = $("#translateX").val() + "," + $("#translateY").val() + "," + $("#translateZ").val();
+
+            World.selectedMarker.poiData.rotate = "0" + "," + $("#rotateY").val() + "," + "0";
+
+            var scaleM = $("#scaleM").val();
+            World.selectedMarker.poiData.scale = scaleM + "," + scaleM + "," + scaleM;
+
 
             World.selectedMarker.distanceToUser = World.selectedMarker.markerObject.locations[0].distanceToUser();
 
             World.targetGeoObject.locations[0].latitude = parseFloat($("#latitude").val());
             World.targetGeoObject.locations[0].longitude = parseFloat($("#longitude").val());
-            World.targetGeoObject.locations[0].altitude = parseFloat($("#altitude").val());
-
-            World.targetGeoObject.drawables.cam[0].scale.x = parseFloat($("#scaleX").val());
-            World.targetGeoObject.drawables.cam[0].scale.y = parseFloat($("#scaleY").val());
-            World.targetGeoObject.drawables.cam[0].scale.z = parseFloat($("#scaleZ").val());
-
-            World.targetGeoObject.drawables.cam[0].rotate.x = parseFloat($("#rotateX").val());
-            World.targetGeoObject.drawables.cam[0].rotate.y = parseFloat($("#rotateY").val());
-            World.targetGeoObject.drawables.cam[0].rotate.z = parseFloat($("#rotateZ").val());
+            //World.targetGeoObject.locations[0].altitude = parseFloat($("#altitude").val());
 
             World.targetGeoObject.drawables.cam[0].translate.x = parseFloat($("#translateX").val());
             World.targetGeoObject.drawables.cam[0].translate.y = parseFloat($("#translateY").val());
             World.targetGeoObject.drawables.cam[0].translate.z = parseFloat($("#translateZ").val());
+
+            World.targetGeoObject.drawables.cam[0].rotate.x = 0;
+            World.targetGeoObject.drawables.cam[0].rotate.y = parseFloat($("#rotateY").val());
+            World.targetGeoObject.drawables.cam[0].rotate.z = 0;
+
+            World.targetGeoObject.drawables.cam[0].scale.x = parseFloat(scaleM);
+            World.targetGeoObject.drawables.cam[0].scale.y = parseFloat(scaleM);
+            World.targetGeoObject.drawables.cam[0].scale.z = parseFloat(scaleM);
 
             World.stateOnDistance();
 
@@ -467,32 +515,21 @@ var World = {
         $("#panel-settings").panel("close");
     },
 
-    onSettingsOpenButtonClicked: function onSettingsOpenButtonClickedFn() {
-         if (World.selectedMarker != null) {
-            $("#panel-settings").panel("open");
-
-            $("#latitude").val(World.selectedMarker.poiData.latitude);
-            $("#longitude").val(World.selectedMarker.poiData.longitude);
-            $("#altitude").val(World.selectedMarker.poiData.altitude);
-
-            var scaleXYZ = World.selectedMarker.poiData.scale.split(',');
-            var rotateXYZ = World.selectedMarker.poiData.rotate.split(',');
-            var translateXYZ = World.selectedMarker.poiData.translate.split(',');
-
-            $("#scaleX").val(scaleXYZ[0]);
-            $("#scaleY").val(scaleXYZ[1]);
-            $("#scaleZ").val(scaleXYZ[2]);
-
-            $("#rotateX").val(rotateXYZ[0]);
-            $("#rotateY").val(rotateXYZ[1]);
-            $("#rotateZ").val(rotateXYZ[2]);
-
-            $("#translateX").val(translateXYZ[0]);
-            $("#translateY").val(translateXYZ[1]);
-            $("#translateZ").val(translateXYZ[2]);
-         }
+    onSettingsCancelButtonClicked: function onSettingsCancelButtonClickedFn() {
+        $("#panel-settings").panel("close");
     },
 
+    onSettingsDefaultButtonClicked: function onSettingsDefaultButtonClickedFn() {
+        $("#translateX").val(0);
+        $("#translateY").val(0);
+        $("#translateZ").val(0);
+
+        $("#rotateY").val(0);
+
+        $("#scaleM").val(1);
+
+//        World.onSettingsSaveButtonClicked();
+    },
 
     // Screen was clicked but no geo-object was hit.
     // Убрать выделенные метки, скрыть модель
@@ -510,6 +547,8 @@ var World = {
         //World.selectedMarkerID = -1;
 
         World.showUserMessage('Select POI to navigate');
+
+        $("#popupSettingsButton").hide();
     },
 
     formatNum: function formatNumFn(num, decimals) {

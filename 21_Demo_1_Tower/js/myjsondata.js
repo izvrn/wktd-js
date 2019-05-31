@@ -38,4 +38,35 @@ var myJsonData = [{
     "scale": "1,1,1",
     "rotate": "0,0,0",
     "translate": "0,0,0"
-}];
+}, {
+    "id": "5",
+    "latitude": "51.8310630",
+    "longitude": "10.7872815",
+    "description": "Dullenturm",
+    "altitude": "0",
+    "name": "POI#5",
+    "scale": "1,1,1",
+    "rotate": "0,0,0",
+    "translate": "0,0,0"
+}, {
+    "id": "6",
+    "latitude": "51.833234",
+    "longitude": "10.784389",
+    "description": "Rathaus Wernigerode",
+    "altitude": "0",
+    "name": "POI#7",
+    "scale": "1,1,1",
+    "rotate": "0,0,0",
+    "translate": "0,0,0"
+}, {
+    "id": "7",
+    "latitude": "51.831356",
+    "longitude": "10.787251",
+    "description": "Kleinstes Haus",
+    "altitude": "0",
+    "name": "POI#6",
+    "scale": "1,1,1",
+    "rotate": "0,0,0",
+    "translate": "0,0,0"
+}
+];
