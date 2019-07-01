@@ -48,8 +48,8 @@ var myJsonData = [{
     "shortcut": "assets/images/hut.jpg"
 }, {
     "id": "5",
-    "latitude": "51.8310630",
-    "longitude": "10.7872815",
+    "latitude": "51.8311167",
+    "longitude": "10.7873283",
     "description": "Dullenturm",
     "altitude": "0",
     "name": "POI#5",
