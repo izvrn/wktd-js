@@ -110,9 +110,17 @@ function Marker(poiData) {
     this.markerObject = new AR.GeoObject(markerLocation, {
         drawables: {
             cam: [this.markerDrawableIdle, this.markerDrawableSelected, this.titleLabel, this.descriptionLabel],
-            indicator: this.directionIndicatorDrawable,
+            indicator: [this.directionIndicatorDrawable],
             radar: this.radardrawables
-        }
+        },
+        onEnterFieldOfVision : function(event) {
+            //World.showImgIndicator();
+            //AR.logger.debug('onEnterFieldOfVision!');
+        },
+        onExitFieldOfVision  : function(event) {
+            //World.hideImgIndicator();
+            //AR.logger.debug('onExitFieldOfVision!');
+        },
     });
 
     return this;
@@ -231,6 +239,9 @@ Marker.prototype.setSelected = function(marker) {
 
     /* Enables the direction indicator drawable for the current marker. */
     marker.directionIndicatorDrawable.enabled = true;
+
+    //World.showImgIndicator();
+
     /* Starts the selected-state animation. */
     marker.animationGroupSelected.start();
 };
@@ -300,6 +311,9 @@ Marker.prototype.setDeselected = function(marker) {
 
     /* Disables the direction indicator drawable for the current marker. */
     marker.directionIndicatorDrawable.enabled = false;
+
+    //World.hideImgIndicator();
+
     /* Starts the idle-state animation. */
     marker.animationGroupIdle.start();
 };

@@ -31,6 +31,7 @@ var World = {
     // selected to navigate marker
     selectedMarker: null,
     selectedMarkerID: -1,
+    isMarkerSelected: false,
 
     locationUpdateCounter: 0,
     updatePlacemarkDistancesEveryXLocationUpdates: 10,
@@ -38,8 +39,10 @@ var World = {
     // модель
     targetGeoObject: null,
 
+    isImgListItemVisible: false,
+
     init: function initFn() {
-        AR.logger.activateDebugMode();
+        //AR.logger.activateDebugMode();
     },
 
     createModelAtLocation: function createModelAtLocationFn(marker) {
@@ -58,38 +61,33 @@ var World = {
         var rotateXYZ = marker.poiData.rotate.split(',');
         var translateXYZ = marker.poiData.translate.split(',');
 
-        var path = "";
+        var path = marker.poiData.model;
 
-        if (marker.poiData.id == 5)
-            path = "assets/Tower.wt3";
-        else if (marker.poiData.id == 6)
-            path = "assets/TownhallOld.wt3";
-        else
-            path = "assets/House.wt3";
-
-        /* Next the model object is loaded. */
-        var model = new AR.Model(path, {
-//            onLoaded: this.worldLoaded,
-            onError: World.onError,
-            scale: {
-                x: parseFloat(scaleXYZ[0]),
-                y: parseFloat(scaleXYZ[1]),
-                z: parseFloat(scaleXYZ[2])
-            },
-               // rotates it 90 degrees around the z-axis and 180 degrees around the x-axis
-               rotate: {
-                x: parseFloat(rotateXYZ[0]),
-                y: parseFloat(rotateXYZ[1]),
-                z: parseFloat(rotateXYZ[2])
-               },
-               // moves the 0bject 5 SDUs along the x- and the y-axis
-               translate: {
-                x: parseFloat(translateXYZ[0]),
-                y: parseFloat(translateXYZ[1]),
-                z: parseFloat(translateXYZ[2])
-               },
-            rotatesToCamera: false
-        });
+        if (path != "") {
+            /* Next the model object is loaded. */
+            var model = new AR.Model(path, {
+                //onLoaded: this.worldLoaded,
+                onError: World.onError,
+                scale: {
+                    x: parseFloat(scaleXYZ[0]),
+                    y: parseFloat(scaleXYZ[1]),
+                    z: parseFloat(scaleXYZ[2])
+                },
+                   // rotates it 90 degrees around the z-axis and 180 degrees around the x-axis
+                   rotate: {
+                    x: parseFloat(rotateXYZ[0]),
+                    y: parseFloat(rotateXYZ[1]),
+                    z: parseFloat(rotateXYZ[2])
+                   },
+                   // moves the 0bject 5 SDUs along the x- and the y-axis
+                   translate: {
+                    x: parseFloat(translateXYZ[0]),
+                    y: parseFloat(translateXYZ[1]),
+                    z: parseFloat(translateXYZ[2])
+                   },
+                rotatesToCamera: false
+            });
+        }
 
         //if (model.rotatesToCamera)
         //   AR.logger.debug("rotatesToCamera = true");
@@ -104,13 +102,58 @@ var World = {
 //            verticalAnchor: AR.CONST.VERTICAL_ANCHOR.TOP
 //        });
 
-        /* Putting it all together the location and 3D model is added to an AR.GeoObject. */
-        this.targetGeoObject = new AR.GeoObject(modelLocation, {
-            drawables: {
-                cam: [model],
-            },
-            enabled: false
-        });
+        var indicatorDrawable = new AR.ImageDrawable(World.markerDrawableDirectionIndicator, 0.1, {
+                enabled: false,
+                verticalAnchor: AR.CONST.VERTICAL_ANCHOR.TOP
+            });
+
+        if (path != "") {
+            /* Putting it all together the location and 3D model is added to an AR.GeoObject. */
+            this.targetGeoObject = new AR.GeoObject(modelLocation, {
+                drawables: {
+                    cam: [model],
+                    indicator: [indicatorDrawable],
+                },
+                enabled: false,
+                onEnterFieldOfVision : function(event) {
+                    //World.showImgIndicator();
+                    //AR.logger.debug('onEnterFieldOfVision!');
+                },
+                onExitFieldOfVision  : function(event) {
+                    //World.hideImgIndicator();
+                    //AR.logger.debug('onExitFieldOfVision!');
+                },
+            });
+        }
+        else {
+                /* Putting it all together the location and 3D model is added to an AR.GeoObject. */
+                this.targetGeoObject = new AR.GeoObject(modelLocation, {
+                    drawables: {
+                        indicator: [indicatorDrawable],
+                    },
+                    enabled: false,
+                    onEnterFieldOfVision : function(event) {
+
+                    if (World.targetGeoObject != null) {
+                            World.showImgIndicator();
+                            if (World.isImgListItemVisible == true)
+                                $("#viewerPic").css('display', 'block');
+
+                            AR.logger.debug('onEnterFieldOfVision!');
+                    }
+                    },
+                    onExitFieldOfVision  : function(event) {
+                    if (World.targetGeoObject != null) {
+                            World.hideImgIndicator();
+
+                            if (World.isImgListItemVisible == true)
+                                $("#viewerPic").css('display', 'none');
+
+                            AR.logger.debug('onExitFieldOfVision!');
+                        }
+                    },
+                });
+        }
     },
 //
 //    worldLoaded: function worldLoadedFn() {
@@ -146,7 +189,9 @@ var World = {
                 "description": poiData[currentPlaceNr].description,
                 "scale": poiData[currentPlaceNr].scale,
                 "rotate": poiData[currentPlaceNr].rotate,
-                "translate": poiData[currentPlaceNr].translate
+                "translate": poiData[currentPlaceNr].translate,
+                "model": poiData[currentPlaceNr].model,
+                "shortcut": poiData[currentPlaceNr].shortcut
             };
 
             World.markerList.push(new Marker(singlePoi));
@@ -199,7 +244,9 @@ var World = {
         AR.context.scene.maxScalingDistance = 200;
         AR.context.scene.scalingFactor = 0.2;
 
-        World.showUserMessage("minScalingDistance=" + AR.context.scene.minScalingDistance + " maxScalingDistance=" + AR.context.scene.maxScalingDistance + " ScalingFactor=" + AR.context.scene.scalingFactor);
+        //AR.context.scene.cullingDistance = 3000000;
+
+        //World.showUserMessage("cullingDistance=" + AR.context.scene.cullingDistance + " minScalingDistance=" + AR.context.scene.minScalingDistance + " maxScalingDistance=" + AR.context.scene.maxScalingDistance + " ScalingFactor=" + AR.context.scene.scalingFactor);
     },
 
     /* Request POI data. */
@@ -208,8 +255,6 @@ var World = {
         AR.platform.sendJSONObject({
             action: "load_poi_list",
         });
-
-        $("#popupSettingsButton").hide();
     },
 
     loadExistingPoiList: function requestDataFromLocalFn(jsonData){
@@ -218,6 +263,28 @@ var World = {
             World.loadPoisFromJsonData(myJsonData);
         else
             World.loadPoisFromJsonData(jsonData);
+    },
+
+    openModal: function openModalFn(pic){
+        AR.logger.debug(pic.src);
+        AR.logger.debug($("#viewImg").attr("src"));
+        if (World.isImgListItemVisible == true && pic.src == $("#viewImg").attr("src")) {
+          World.closeModal();
+        }
+        else {
+            $("#viewerPic").css('display', 'block');
+            $("#viewImg").attr("src", pic.src);
+            $("#caption").innerHTML = pic.alt;
+
+            World.isImgListItemVisible = true;
+        }
+    },
+
+    closeModal: function closeModalFn(){
+        AR.logger.debug('closeModalFn');
+        $("#viewerPic").css('display', 'none');
+
+        World.isImgListItemVisible = false;
     },
 
     /*
@@ -283,25 +350,52 @@ var World = {
     stateOnDistance: function stateOnDistanceFn() {
             var distance = World.selectedMarker.distanceToUser;
 
-            AR.logger.debug("Curr.: " + distance + ", Prev.: " + World.prevDistance);
-
             //if (World.prevDistance == -1.0 || ((Math.abs(World.prevDistance - distance) < 20) && (Math.abs(World.prevDistance - distance) > 1))) {
                 if (distance < World.nearDistance)
                 {
-                    if (World.targetGeoObject.enabled != true)
-                    {
-                        World.targetGeoObject.enabled = true;
-                        World.selectedMarker.markerObject.enabled = false;
+                    //if (World.targetGeoObject != null) {
+                        if (World.targetGeoObject.enabled != true)
+                        {
+                            World.targetGeoObject.enabled = true;
+                            World.targetGeoObject.drawables.indicator[0].enabled = true;
+                            World.selectedMarker.markerObject.enabled = false;
 
-                        AR.logger.debug('Мы рядом с целью!');
-                    }
+                            if (World.selectedMarker.poiData.model == "") {
+                                World.showImgIndicator();
+                            }
+
+                            AR.logger.debug('Мы рядом с целью!');
+                        }
+                    //}
+                    /*else
+                    {
+                        if (World.isImgListItemVisible == false)
+                        {
+                            World.showImgIndicator();
+                            World.selectedMarker.markerObject.enabled = false;
+
+                            AR.logger.debug('Мы рядом с целью!');
+                        }
+                    }*/
                 }
                 else
                 {
                     if (World.selectedMarker.markerObject.enabled != true)
                     {
-                        World.targetGeoObject.enabled = false;
-                        World.selectedMarker.markerObject.enabled = true;
+                        //if (World.targetGeoObject != null) {
+                            World.targetGeoObject.enabled = false;
+                            World.targetGeoObject.drawables.indicator[0].enabled = false;
+                            World.selectedMarker.markerObject.enabled = true;
+
+                            if (World.selectedMarker.poiData.model == "") {
+                                World.hideImgIndicator();
+                            }
+                        //}
+                        /*else
+                        {
+                            World.hideImgIndicator();
+                            World.selectedMarker.markerObject.enabled = true;
+                        }*/
 
                         AR.logger.debug('Мы не рядом с целью!');
                     }
@@ -363,6 +457,7 @@ var World = {
         /* Update panel values. */
         $("#poi-detail-title").html(marker.poiData.title);
         $("#poi-detail-description").html(marker.poiData.description);
+        $("#poi-detail-shortcut").attr("src", marker.poiData.shortcut);
 
         /*
             It's ok for AR.Location subclass objects to return a distance of `undefined`. In case such a distance
@@ -418,14 +513,36 @@ var World = {
 
         World.findSelectedMarker();
 
-        World.createModelAtLocation(World.selectedMarker);
+        //$("#poi-imgIndicator").attr("src", World.selectedMarker.poiData.shortcut);
+
+        //if (World.selectedMarker.poiData.model != "")
+            World.createModelAtLocation(World.selectedMarker);
 
         World.stateOnDistance();
 
         $("#panel-poidetail").panel("close");
 
-        $("#popupSettingsButton").show();
+        $("#footerDivButton").css('visibility', 'visible'); // Для скрытия
+        //$("#popupSettingsButton").css('visibility', 'visible'); // Для показа
+        //$("#resetNavigateButton").css('visibility', 'visible'); // Для показа
+
+        World.isMarkerSelected = true;
     },
+
+    showImgIndicator: function showImgIndicatorFn() {
+        //if (World.isMarkerSelected) {
+            $("#imgListItem").css('visibility', 'visible'); // Для показа
+            //World.isImgListItemVisible = true;
+        //}
+    },
+
+    hideImgIndicator: function hideImgIndicatorFn() {
+        //if (World.isMarkerSelected) {
+            $("#imgListItem").css('visibility', 'hidden'); // Для скрытия
+            //World.isImgListItemVisible = false;
+        //}
+    },
+
 
      findSelectedMarker: function findSelectedMarkerFn() {
         for (var i = 0; i < World.markerList.length; i++) {
@@ -488,21 +605,23 @@ var World = {
 
             World.selectedMarker.distanceToUser = World.selectedMarker.markerObject.locations[0].distanceToUser();
 
-            World.targetGeoObject.locations[0].latitude = parseFloat($("#latitude").val());
-            World.targetGeoObject.locations[0].longitude = parseFloat($("#longitude").val());
-            //World.targetGeoObject.locations[0].altitude = parseFloat($("#altitude").val());
+            if (World.targetGeoObject != null) {
+                World.targetGeoObject.locations[0].latitude = parseFloat($("#latitude").val());
+                World.targetGeoObject.locations[0].longitude = parseFloat($("#longitude").val());
+                //World.targetGeoObject.locations[0].altitude = parseFloat($("#altitude").val());
 
-            World.targetGeoObject.drawables.cam[0].translate.x = parseFloat($("#translateX").val());
-            World.targetGeoObject.drawables.cam[0].translate.y = parseFloat($("#translateY").val());
-            World.targetGeoObject.drawables.cam[0].translate.z = parseFloat($("#translateZ").val());
+                World.targetGeoObject.drawables.cam[0].translate.x = parseFloat($("#translateX").val());
+                World.targetGeoObject.drawables.cam[0].translate.y = parseFloat($("#translateY").val());
+                World.targetGeoObject.drawables.cam[0].translate.z = parseFloat($("#translateZ").val());
 
-            World.targetGeoObject.drawables.cam[0].rotate.x = 0;
-            World.targetGeoObject.drawables.cam[0].rotate.y = parseFloat($("#rotateY").val());
-            World.targetGeoObject.drawables.cam[0].rotate.z = 0;
+                World.targetGeoObject.drawables.cam[0].rotate.x = 0;
+                World.targetGeoObject.drawables.cam[0].rotate.y = parseFloat($("#rotateY").val());
+                World.targetGeoObject.drawables.cam[0].rotate.z = 0;
 
-            World.targetGeoObject.drawables.cam[0].scale.x = parseFloat(scaleM);
-            World.targetGeoObject.drawables.cam[0].scale.y = parseFloat(scaleM);
-            World.targetGeoObject.drawables.cam[0].scale.z = parseFloat(scaleM);
+                World.targetGeoObject.drawables.cam[0].scale.x = parseFloat(scaleM);
+                World.targetGeoObject.drawables.cam[0].scale.y = parseFloat(scaleM);
+                World.targetGeoObject.drawables.cam[0].scale.z = parseFloat(scaleM);
+            }
 
             World.stateOnDistance();
 
@@ -533,22 +652,37 @@ var World = {
 
     // Screen was clicked but no geo-object was hit.
     // Убрать выделенные метки, скрыть модель
-    onScreenClick: function onScreenClickFn() {
-        if(World.targetGeoObject != null){
-            World.targetGeoObject.drawables.cam[0].destroy();
-            World.targetGeoObject = null;
-        }
+    //onScreenClick: function onScreenClickFn() {
+    //},
 
-        if (World.selectedMarker != null) {
-            World.selectedMarker.markerObject.enabled = true;
-            World.selectedMarker.setDeselected(World.selectedMarker);
-        }
+    resetNavigate: function resetNavigateFn() {
+            if(World.targetGeoObject != null){
+                if (World.selectedMarker.poiData.model != "")
+                    World.targetGeoObject.drawables.cam[0].destroy();
+                else {
+                    World.hideImgIndicator();
+                    World.closeModal();
+                }
 
-        //World.selectedMarkerID = -1;
+                World.targetGeoObject.drawables.indicator[0].destroy();
 
-        World.showUserMessage('Select POI to navigate');
+                World.targetGeoObject = null;
+            }
 
-        $("#popupSettingsButton").hide();
+            if (World.selectedMarker != null) {
+                World.selectedMarker.markerObject.enabled = true;
+                World.selectedMarker.setDeselected(World.selectedMarker);
+            }
+
+            //World.selectedMarkerID = -1;
+
+            World.showUserMessage('Select POI to navigate');
+
+            $("#footerDivButton").css('visibility', 'hidden'); // Для скрытия
+            //$("#popupSettingsButton").css('visibility', 'hidden'); // Для скрытия
+            //$("#resetNavigateButton").css('visibility', 'hidden'); // Для скрытия
+
+            World.isMarkerSelected = false;
     },
 
     formatNum: function formatNumFn(num, decimals) {
@@ -602,7 +736,6 @@ var World = {
 //        return poiData;
 //    }
 //};
-
 
 World.init();
 

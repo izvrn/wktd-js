@@ -7,7 +7,9 @@ var myJsonData = [{
     "name": "POI#1",
     "scale": "1,1,1",
     "rotate": "0,0,0",
-    "translate": "0,0,0"
+    "translate": "0,0,0",
+    "model": "assets/House.wt3",
+    "shortcut": "assets/images/hut.jpg"
 }, {
     "id": "2",
     "latitude": "51.6910",
@@ -17,7 +19,9 @@ var myJsonData = [{
     "name": "POI#2",
     "scale": "1,1,1",
     "rotate": "0,0,0",
-    "translate": "0,0,0"
+    "translate": "0,0,0",
+    "model": "",
+    "shortcut": "assets/images/kleinstes-haus.jpg"
 }, {
     "id": "3",
     "latitude": "51.68988",
@@ -27,7 +31,9 @@ var myJsonData = [{
     "name": "POI#3",
     "scale": "1,1,1",
     "rotate": "0,0,0",
-    "translate": "0,0,0"
+    "translate": "0,0,0",
+    "model": "assets/House.wt3",
+    "shortcut": "assets/images/hut.jpg"
 }, {
     "id": "4",
     "latitude": "51.6676",
@@ -37,7 +43,9 @@ var myJsonData = [{
     "name": "POI#4",
     "scale": "1,1,1",
     "rotate": "0,0,0",
-    "translate": "0,0,0"
+    "translate": "0,0,0",
+    "model": "assets/House.wt3",
+    "shortcut": "assets/images/hut.jpg"
 }, {
     "id": "5",
     "latitude": "51.8310630",
@@ -47,7 +55,9 @@ var myJsonData = [{
     "name": "POI#5",
     "scale": "1,1,1",
     "rotate": "0,0,0",
-    "translate": "0,0,0"
+    "translate": "0,0,0",
+    "model": "assets/Tower.wt3",
+    "shortcut": "assets/images/Dullenturm.jpg"
 }, {
     "id": "6",
     "latitude": "51.833234",
@@ -57,7 +67,9 @@ var myJsonData = [{
     "name": "POI#7",
     "scale": "1,1,1",
     "rotate": "0,0,0",
-    "translate": "0,0,0"
+    "translate": "0,0,0",
+    "model": "",
+    "shortcut": "assets/images/Townhall.jpg"
 }, {
     "id": "7",
     "latitude": "51.831356",
@@ -67,6 +79,8 @@ var myJsonData = [{
     "name": "POI#6",
     "scale": "1,1,1",
     "rotate": "0,0,0",
-    "translate": "0,0,0"
+    "translate": "0,0,0",
+    "model": "assets/House.wt3",
+    "shortcut": "assets/images/kleinstes-haus.jpg"
 }
 ];

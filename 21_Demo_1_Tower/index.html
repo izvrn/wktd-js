@@ -20,6 +20,17 @@
     <script type="text/javascript" src="jquery/jquery-1.9.1.min.js"></script>
     <script type="text/javascript" src="jquery/jquery.mobile-1.3.2.min.js"></script>
 
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+
+    <!-- Последняя компиляция и сжатый CSS -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+
+    <!-- Дополнение к теме -->
+    <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+
+    <!-- Последняя компиляция и сжатый JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+
     <!-- marker representation-->
     <script src="js/marker.js"></script>
 
@@ -28,13 +39,17 @@
 
     <!-- World logic-->
     <script type="text/javascript" src="js/3toweratgeolocation.js"></script>
-</head>
 
+    <script src="js/interact.min.js"></script>
+
+    <!-- default -->
+    <link rel="stylesheet" href="css/default.css"/>
+</head>
 <body>
-    <div data-role="page" id="page1" style="background: none;">
-        <!-- MAIN PAGE CONTENT -->
+<div data-role="page" id="page1" style="background: none;">
+    <!-- MAIN PAGE CONTENT -->
         <!-- message text -->
-        <div id="loadingMessage" class="info" data-role="header" data-position="fixed" data-theme="c">Loading ...</div>
+        <div id="loadingMessage" data-role="header" data-position="fixed" data-theme="c">Loading ...</div>
 
         <!-- transparent footer-->
         <div data-role="footer" class="ui-bar" data-theme="f" data-position="fixed" style="text-align:center;">
@@ -47,14 +62,48 @@
             <!-- popup displayed when button clicked
             <div data-role="popup" id="popupInfo" class="ui-content" data-theme="e" style="max-width:350px;">
                 <p style="text-align:right;" id="status-message">Trying to find out where you are</p>
-            </div> -->
+            </div>
 
-            <a id="popupSettingsButton" href="javascript: World.onSettingsOpenButtonClicked();" data-rel="popup" data-role="button"
+            <a id="popupSettingsButton" style="visibility: hidden;" href="javascript: World.onSettingsOpenButtonClicked();" data-rel="popup" data-role="button"
                class="ui-icon-alt" data-inline="true" data-transition="pop" data-icon="gear" data-theme="e"
-               data-iconpos="notext">Settings</a> </p>
-
+               data-iconpos="notext">
+            </a>-->
+            <div id="footerDivButton" class="container" style="visibility: hidden;">
+                <button id="popupSettingsButton" type="button" class="btn btn-primary" onclick="javascript: World.onSettingsOpenButtonClicked();">
+                    <i class="fa fa-cog fa-3x" aria-hidden="true"></i>
+                </button>
+                <button id="resetNavigateButton" type="button" class="btn btn-danger" onclick="javascript: World.resetNavigate();">
+                    <i class="fa fa-times fa-3x" aria-hidden="true"></i>
+                </button>
+            </div>
+            </p>
+            </p>
         </div>
 
+    <ul id="imgListItem" style="visibility: hidden;">
+        <li class="imgItem">
+            <img class="pic" onclick="javascript: World.openModal(this);" src="assets/images/rathaus_1900.jpg" alt="Zwischen 1890 und 1900">
+        </li>
+        <li class="imgItem">
+            <img class="pic" onclick="javascript: World.openModal(this);" src="assets/images/rathaus_1937.jpg" alt="Blick auf das Rathaus, 1937">
+        </li>
+        <li class="imgItem">
+            <img class="pic" onclick="javascript: World.openModal(this);" src="assets/images/rathaus_1951.jpg" alt="1951">
+        </li>
+        <li class="imgItem">
+            <img class="pic" onclick="javascript: World.openModal(this);" src="assets/images/rathaus_1961.jpg" alt="DDR-Briefmarke aus dem Jahr 1961">
+        </li>
+        <li class="imgItem">
+            <img class="pic" onclick="javascript: World.openModal(this);" src="assets/images/rathaus_2011.jpg" alt="Westflügel Waaghaus, Blick von Süden, 2011">
+        </li>
+    </ul>
+
+    <!-- The Modal -->
+    <div id="viewerPic" class="draggable" style="display: none;">
+        <span id="closeModal" onclick="javascript: World.closeModal();">×</span>
+        <img id="viewImg">
+        <div id="caption"></div>
+    </div>
         <!-- PANELS, ONLY VISIBLE ON DEMAND -->
         <!-- panel containing POI detail information -->
         <div data-role="panel" id="panel-poidetail" data-position="right" data-display="overlay"
@@ -79,11 +128,16 @@
                 <!-- distance -->
                 <h4>Distance: <a id="poi-detail-distance"></a></h4>
 
-                <!-- more button-->
+                <!-- more button
                 <a href="javascript: World.onPoiNavigateButtonClicked();" data-role="button" data-icon="check"
-                   data-iconpos="right" data-inline="true">Navigate</a>
+                   data-iconpos="right" data-inline="true">Navigate</a>-->
 
-                <img src="assets/images/Dullenturm.jpg" alt="hut">
+                <button type="button" class="btn btn-success" onclick="javascript: World.onPoiNavigateButtonClicked();">
+                    <i class="fa fa-location-arrow" aria-hidden="true"></i>
+                    Navigate
+                </button>
+                </p>
+                <img id="poi-detail-shortcut" src="" alt="hut">
             </div>
         </div>
 
@@ -130,17 +184,50 @@
                         M (0.5 to half): <input id="scaleM" type="text" >
                     </p>
                     <p>
-                        <a href="javascript: World.onSettingsSaveButtonClicked();" data-role="button" data-icon="check"
+                        <!--<a href="javascript: World.onSettingsSaveButtonClicked();" data-role="button" data-icon="check"
                            data-iconpos="right" data-inline="true">Save</a>
                         <a href="javascript: World.onSettingsCancelButtonClicked();" data-role="button" data-icon="delete"
                           data-iconpos="right" data-inline="true">Cancel</a>
                         <br>
                         <a href="javascript: World.onSettingsDefaultButtonClicked();" data-role="button" data-icon="refresh"
-                           data-iconpos="right" data-inline="true">Default</a>
+                           data-iconpos="right" data-inline="true">Default</a>-->
+                        <button type="button" style="width: 100px;" class="btn btn-success" onclick="javascript: World.onSettingsSaveButtonClicked();">
+                            <i class="fa fa-floppy-o" aria-hidden="true"></i>
+                            Save
+                        </button>
+                    </p>
+                        <button type="button" style="width: 100px;" class="btn btn-secondary" onclick="javascript: World.onSettingsCancelButtonClicked();">
+                            <i class="fa fa-ban" aria-hidden="true"></i>
+                            Cancel
+                        </button>
+                    </p>
+                        <button type="button" style="width: 100px;" class="btn btn-primary" onclick="javascript: World.onSettingsDefaultButtonClicked();">
+                            <i class="fa fa-refresh" aria-hidden="true"></i>
+                            Default
+                        </button>
                     </p>
                 </div>
             </div>
         </div>
     </div>
+
+<script>
+const position = { x: 0, y: 0 };
+
+interact('.draggable').draggable({
+  listeners: {
+    start (event) {
+      console.log(event.type, event.target)
+    },
+    move (event) {
+      position.x += event.dx
+      position.y += event.dy
+
+      event.target.style.transform =
+        `translate(${position.x}px, ${position.y}px)`
+    },
+  }
+});
+</script>
 </body>
 </html>
