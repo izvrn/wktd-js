@@ -9,7 +9,8 @@
                 "name": "Tower At Geo Location",
                 "path": "21_Demo_1_Tower/index.html",
                 "requiredFeatures": [
-                    "geo"
+                    "geo",
+                    "instant_tracking"
                 ],
                 "startupConfiguration": {
                     "camera_position": "back",

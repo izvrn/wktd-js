@@ -20,8 +20,8 @@ var myJsonData = [{
     "scale": "1,1,1",
     "rotate": "0,0,0",
     "translate": "0,0,0",
-    "model": "",
-    "shortcut": "assets/images/kleinstes-haus.jpg"
+    "model": "assets/House.wt3",
+    "shortcut": "assets/images/hut.jpg"
 }, {
     "id": "3",
     "latitude": "51.68988",

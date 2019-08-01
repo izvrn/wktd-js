@@ -28,6 +28,11 @@
     <!-- Дополнение к теме -->
     <link rel="stylesheet" href="css/bootstrap-theme.min.css">
 
+    <link rel="stylesheet" href="css/poi-radar.css"/>
+
+    <!-- default -->
+    <link rel="stylesheet" href="css/default.css"/>
+
     <!-- Последняя компиляция и сжатый JavaScript -->
     <script src="js/bootstrap.min.js"></script>
 
@@ -42,14 +47,17 @@
 
     <script src="js/interact.min.js"></script>
 
-    <!-- default -->
-    <link rel="stylesheet" href="css/default.css"/>
+    <script type="text/javascript" src="js/addingradar.js"></script>
+
+    <script type="text/javascript" src="js/radar.js"></script>
 </head>
 <body>
 <div data-role="page" id="page1" style="background: none;">
     <!-- MAIN PAGE CONTENT -->
         <!-- message text -->
         <div id="loadingMessage" data-role="header" data-position="fixed" data-theme="c">Loading ...</div>
+
+    <div class="radarContainer_left" id="radarContainer"></div>
 
         <!-- transparent footer-->
         <div data-role="footer" class="ui-bar" data-theme="f" data-position="fixed" style="text-align:center;">
