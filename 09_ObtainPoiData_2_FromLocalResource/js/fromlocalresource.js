@@ -114,7 +114,7 @@ var World = {
             For demo purpose they are relocated randomly around the user using a 'Helper'-function.
             Comment out previous 2 lines and use the following line > instead < to use static values 1:1.
         */
-//        World.loadPoisFromJsonData(myJsonData);
+        /* world.loadPoisFromJsonData(myJsonData);. */
     },
 
     onError: function onErrorFn(error) {
