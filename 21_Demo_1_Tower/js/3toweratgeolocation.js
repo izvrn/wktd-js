@@ -135,10 +135,6 @@ var World = {
             World.setupEventListeners()
         },
 
-            onError: function onErrorFn(error) {
-                alert(error);
-            },
-
     createModelAtLocation: function createModelAtLocationFn(marker) {
 
         /*
@@ -902,6 +898,23 @@ var World = {
             icon: iconToUse
         });
     },
+
+    addModelValues: function addModelValuesFn() {
+            rotationValues.push(defaultRotationValue);
+            scaleValues.push(defaultScaleValue);
+        },
+
+        resetModels: function resetModelsFn() {
+            this.instantTrackable.drawables.removeCamDrawable(allCurrentModels);
+
+            allCurrentModels = [];
+            World.resetAllModelValues();
+        },
+
+        resetAllModelValues: function resetAllModelValuesFn() {
+            rotationValues = [];
+            scaleValues = [];
+        },
 
     onError: function onErrorFn(error) {
         alert(error);
